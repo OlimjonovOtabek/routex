@@ -92,7 +92,6 @@ export function splitLineString(route: RouteFeature, coordinates: LngLat) {
   return [];
  }
 
- console.log(route.geometry);
  route.geometry = cleanCoords(route.geometry);
  const firstPart = lineSlice(
   coordinates,

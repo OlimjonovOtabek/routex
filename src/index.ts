@@ -21,11 +21,62 @@ import {
 } from "../variables";
 
 window.map = null;
-
+let TOKEN: string;
+let ASSIGNMENT: Assignment;
 main();
 
 async function main() {
- // Waiting for all api elements to be loaded
+ TOKEN = await (await getToken()).text();
+ ASSIGNMENT = await (await getAssignments()).json();
+ ROUTE.start.coordinates = [
+  ASSIGNMENT.brigadeLocation.latitude,
+  ASSIGNMENT.brigadeLocation.longitude,
+ ];
+ ROUTE.start.title = ASSIGNMENT.nameRu;
+
+ ROUTE.end.coordinates = [
+  ASSIGNMENT.destinationLocation.longitude,
+  ASSIGNMENT.destinationLocation.latitude,
+ ];
+ ROUTE.end.title = ASSIGNMENT.destinationFullAddressLine;
+ console.log(ASSIGNMENT);
+ const lonLats = [
+  {
+   lon: 69.26319372831537,
+   lat: 41.30509406674733,
+  },
+  {
+   lon: 69.26200096724999,
+   lat: 41.304789041824904,
+  },
+  {
+   lon: 69.25814352720873,
+   lat: 41.30368331452013,
+  },
+  {
+   lon: 69.25580876086796,
+   lat: 41.3027110215707,
+  },
+  {
+   lon: 69.2574075682535,
+   lat: 41.3015289988532,
+  },
+  {
+   lon: 69.25611329560805,
+   lat: 41.300194431325735,
+  },
+  {
+   lon: 69.2539815524275,
+   lat: 41.301243022396335,
+  },
+  {
+   lon: 69.25256039030701,
+   lat: 41.30122395725465,
+  },
+ ];
+ const locationBrigade = await (await getBrigadeLocation()).text();
+ console.log(locationBrigade);
+ //  Waiting for all api elements to be loaded
  await ymaps3.ready;
  const {
   YMap,
@@ -45,7 +96,7 @@ async function main() {
  // Initialize the map
  map = new YMap(
   // Pass the link to the HTMLElement of the container
-  document.getElementById("app"),
+  document.getElementById("map"),
   // Pass the map initialization parameters
   { location: LOCATION, showScaleInCopyrights: true },
   [
@@ -178,7 +229,6 @@ async function main() {
     markerElement.style.transform = `rotate(${angle}deg)`;
    }
 
-   debugger;
    const [newLineStingFirstPart, newLineStringSecondPart] = splitLineString(
     route,
     nextCoordinates
@@ -270,6 +320,13 @@ async function main() {
    ])
   );
 
+ let counter = 0;
+
+ setInterval(() => {
+  console.log(counter++);
+  console.log(counter);
+ }, 10000);
+
  const route = await fetchRoute(ROUTE.start.coordinates, ROUTE.end.coordinates);
 
  const routeLength = length(lineString(route.geometry as any), {
@@ -277,7 +334,56 @@ async function main() {
  });
 
  lineStringFirstPart.update({ geometry: route.geometry });
+
  map.addChild(lineStringFirstPart);
  map.addChild(lineStringSecondPart);
  routeProgress(0);
+}
+
+async function getToken(
+ assignmentId: string = "a487c7a1-6f8b-469e-bd62-1c6688df1d82",
+ createdAt: string = "2025-06-18T16:25:51.138427+05:00"
+) {
+ return fetch(
+  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/get-token?assignmentId=${assignmentId}&createdAt=${createdAt}`
+ );
+}
+
+async function getAssignments() {
+ return fetch(
+  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/assignments/hbCt-UsCRGgLF_I_ohwAIhWUsJ4XyE37KJ0mRDRy7FY.`
+ );
+}
+
+async function getBrigadeLocation(
+ id: string = "09fc261e-c281-49be-8d7d-af8f2169f5c5",
+ token: string = "hbCt-UsCRGgLF_I_ohwAIhWUsJ4XyE37KJ0mRDRy7FY."
+) {
+ return fetch(
+  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/brigade-location/${id}?token=${token}`
+ );
+}
+
+interface Assignment {
+ brigadeId: string;
+ brigadePlateNumber: string | null;
+ destinationLocation: {
+  latitude: number;
+  longitude: number;
+ };
+ brigadeLocation: {
+  latitude: number;
+  longitude: number;
+ };
+
+ destinationFullAddressLine: string;
+ name: string;
+ nameRu: string;
+ nameUz: string | null;
+ nameKa: string | null;
+}
+
+interface BrigadeLocation {
+ latitude: number;
+ longitude: number;
 }

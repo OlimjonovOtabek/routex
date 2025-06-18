@@ -6,7 +6,7 @@ export const LOCATION: YMapLocationRequest = {
  zoom: 14.7, // starting zoom
 };
 
-export const INITIAL_DRIVER_SPEED = 105;
+export const INITIAL_DRIVER_SPEED = 60;
 export const MIN_DRIVER_SPEED = 10;
 export const MAX_DRIVER_SPEED = 200;
 
