@@ -66,6 +66,30 @@ export function animate(cb: (progress: number) => void): DriverAnimation {
  };
 }
 
+export async function getToken(
+ assignmentId: string = "6fed6b78-47c6-4de9-b033-ad4b5d3da7a3",
+ createdAt: string = "2025-06-19T12:26:59.155017+05:00"
+) {
+ return fetch(
+  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/get-token?assignmentId=${assignmentId}&createdAt=${createdAt}`
+ );
+}
+
+export async function getAssignments() {
+ return fetch(
+  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/assignments/oJTfJVA1qQl5YFKEWmgaeAHHKTXFmQVkFwHap7iuP-I.`
+ );
+}
+
+export async function getBrigadeLocation(
+ id: string = "09fc261e-c281-49be-8d7d-af8f2169f5c5",
+ token: string = "hbCt-UsCRGgLF_I_ohwAIhWUsJ4XyE37KJ0mRDRy7FY."
+) {
+ return fetch(
+  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/brigade-location/${id}?token=oJTfJVA1qQl5YFKEWmgaeAHHKTXFmQVkFwHap7iuP-I.`
+ );
+}
+
 export function angleFromCoordinate(lngLat1: LngLat, lngLat2: LngLat) {
  const toRadians = (degrees: number) => degrees * (Math.PI / 180);
  const toDegrees = (radians: number) => radians * (180 / Math.PI);
@@ -94,14 +118,14 @@ export function splitLineString(route: RouteFeature, coordinates: LngLat) {
 
  route.geometry = cleanCoords(route.geometry);
  const firstPart = lineSlice(
-  coordinates,
-  route.geometry.coordinates[route.geometry.coordinates.length - 1],
-  route.geometry
+  coordinates as any,
+  route.geometry.coordinates[route.geometry.coordinates.length - 1] as any,
+  route.geometry as any
  );
  const secondPart = lineSlice(
-  route.geometry.coordinates[0],
-  coordinates,
-  route.geometry
+  route.geometry.coordinates[0] as any,
+  coordinates as any,
+  route.geometry as any
  );
  return [
   firstPart.geometry as LineStringGeometry,

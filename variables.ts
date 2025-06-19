@@ -17,16 +17,16 @@ export const ROUTE: {
  start: {
   zIndex: 1000,
   size: "small",
-  title: "Qaynarsoy 40",
+  title: "BePro-Devhub",
   iconName: "building",
-  coordinates: [69.33972071375624, 41.31212823671794],
+  coordinates: [69.220053, 41.275767],
  },
  end: {
   zIndex: 1000,
   size: "normal",
-  title: "BePro-Devhub",
+  title: "ГОРОД  ТАШКЕНТ, ЧИЛАНЗАРСКИЙ РАЙОН, дом:24,",
   iconName: "building",
-  coordinates: [69.22003050184455, 41.27553420124505],
+  coordinates: [69.23175549999212, 41.2853202006884],
  },
 };
 

@@ -1,7 +1,12 @@
-import { along, booleanEqual, length, lineString, point } from "@turf/turf";
+import {
+ booleanEqual,
+ length,
+ lineString,
+ nearestPointOnLine,
+ point,
+} from "@turf/turf";
 import { type LngLat } from "@yandex/ymaps3-types";
 import {
- ANIMATE_DURATION_MS,
  DriverAnimation,
  angleFromCoordinate,
  animate,
@@ -26,53 +31,86 @@ let ASSIGNMENT: Assignment;
 main();
 
 async function main() {
- TOKEN = await (await getToken()).text();
- ASSIGNMENT = await (await getAssignments()).json();
- ROUTE.start.coordinates = [
-  ASSIGNMENT.brigadeLocation.latitude,
-  ASSIGNMENT.brigadeLocation.longitude,
- ];
- ROUTE.start.title = ASSIGNMENT.nameRu;
+ //  TOKEN = await (await getToken()).text();
+ //  ASSIGNMENT = await (await getAssignments()).json();
+ //  ROUTE.start.coordinates = [
+ //   ASSIGNMENT.brigadeLocation.latitude,
+ //   ASSIGNMENT.brigadeLocation.longitude,
+ //  ];
+ //  ROUTE.start.title = ASSIGNMENT.nameRu;
 
- ROUTE.end.coordinates = [
-  ASSIGNMENT.destinationLocation.longitude,
-  ASSIGNMENT.destinationLocation.latitude,
- ];
- ROUTE.end.title = ASSIGNMENT.destinationFullAddressLine;
+ //  ROUTE.end.coordinates = [
+ //   ASSIGNMENT.destinationLocation.longitude,
+ //   ASSIGNMENT.destinationLocation.latitude,
+ //  ];
+ //  ROUTE.end.title = ASSIGNMENT.destinationFullAddressLine ?? "";
  console.log(ASSIGNMENT);
  const lonLats = [
-  {
-   lon: 69.26319372831537,
-   lat: 41.30509406674733,
-  },
-  {
-   lon: 69.26200096724999,
-   lat: 41.304789041824904,
-  },
-  {
-   lon: 69.25814352720873,
-   lat: 41.30368331452013,
-  },
-  {
-   lon: 69.25580876086796,
-   lat: 41.3027110215707,
-  },
-  {
-   lon: 69.2574075682535,
-   lat: 41.3015289988532,
-  },
-  {
-   lon: 69.25611329560805,
-   lat: 41.300194431325735,
-  },
-  {
-   lon: 69.2539815524275,
-   lat: 41.301243022396335,
-  },
-  {
-   lon: 69.25256039030701,
-   lat: 41.30122395725465,
-  },
+  [69.220053, 41.275767],
+  [69.22013, 41.275758],
+  [69.220154, 41.275751],
+  [69.220232, 41.275712],
+  [69.220253, 41.275692],
+  [69.220257, 41.275667],
+  [69.22023, 41.275532],
+  [69.220205, 41.275383],
+  [69.22028, 41.27537],
+  [69.220373, 41.275351],
+  [69.220458, 41.275329],
+  [69.220514, 41.27531],
+  [69.220565, 41.275285],
+  [69.221226, 41.274872],
+  [69.221615, 41.275215],
+  [69.22192, 41.275487],
+  [69.222045, 41.275598],
+  [69.222198, 41.275734],
+  [69.222303, 41.275823],
+  [69.222363, 41.275875],
+  [69.22203, 41.27609],
+  [69.221014, 41.276755],
+  [69.22054, 41.277072],
+  [69.220486, 41.277105],
+  [69.219734, 41.277567],
+  [69.219428, 41.277755],
+  [69.218649, 41.278248],
+  [69.217943, 41.278691],
+  [69.217783, 41.278807],
+  [69.217878, 41.278883],
+  [69.218018, 41.278995],
+  [69.21839, 41.279301],
+  [69.218771, 41.279586],
+  [69.218893, 41.279679],
+  [69.219219, 41.279916],
+  [69.219553, 41.28015],
+  [69.220089, 41.280524],
+  [69.220121, 41.280547],
+  [69.221028, 41.281187],
+  [69.221601, 41.281587],
+  [69.221806, 41.281737],
+  [69.221966, 41.281854],
+  [69.222317, 41.282095],
+  [69.222852, 41.28247],
+  [69.222919, 41.282518],
+  [69.223047, 41.282609],
+  [69.223323, 41.282801],
+  [69.223774, 41.283167],
+  [69.224083, 41.283447],
+  [69.224172, 41.283529],
+  [69.224382, 41.283721],
+  [69.224723, 41.284038],
+  [69.224827, 41.284134],
+  [69.224977, 41.284266],
+  [69.225013, 41.284298],
+  [69.225341, 41.284586],
+  [69.22649, 41.285619],
+  [69.226761, 41.285864],
+  [69.226841, 41.285934],
+  [69.227011, 41.286084],
+  [69.227266, 41.286319],
+  [69.22732, 41.286369],
+  [69.227488, 41.286522],
+  [69.228386, 41.287335],
+  [69.228634, 41.287556],
  ];
  const locationBrigade = await (await getBrigadeLocation()).text();
  console.log(locationBrigade);
@@ -208,17 +246,20 @@ async function main() {
  let driverSpeed = INITIAL_DRIVER_SPEED;
  let prevCoordinates: LngLat;
 
- const routeProgress = (initDistance: number) => {
+ const routeProgress = (initDistance: number, nextCoordinates: LngLat) => {
   let passedDistance = initDistance;
   let passedTime = 0;
+
+  let knownRoute = {} as any;
+
   animation = animate((progress) => {
-   const timeS = (progress * ANIMATE_DURATION_MS) / 1000;
-   const length = passedDistance + driverSpeed * (timeS - passedTime);
+   //  const timeS = (progress * ANIMATE_DURATION_MS) / 1000;
+   //  const length = passedDistance + driverSpeed * (timeS - passedTime);
 
-   const nextCoordinates = along(route.geometry, length, {
-    units: "meters",
-   }).geometry.coordinates as LngLat;
-
+   // const nextCoordinates = along(knownRoute.geometry, 1, {
+   //  units: "meters",
+   // }).geometry.coordinates as LngLat;
+   debugger;
    marker.update({ coordinates: nextCoordinates });
    if (
     prevCoordinates &&
@@ -234,15 +275,14 @@ async function main() {
     nextCoordinates
    );
    lineStringFirstPart.update({ geometry: newLineStingFirstPart });
-   lineStringSecondPart.update({ geometry: newLineStringSecondPart });
 
    prevCoordinates = nextCoordinates;
-   passedTime = timeS;
-   passedDistance = length;
+   //  passedTime = timeS;
+   //  passedDistance = length;
 
-   if (progress === 1 && routeLength > length) {
-    routeProgress(length);
-   }
+   //  if (progress === 1 && routeLength > length) {
+   //   routeProgress(length);
+   //  }
   });
  };
 
@@ -273,7 +313,7 @@ async function main() {
   center: location as any,
   zoom: 13,
  });
- map.addChild(new YMapDefaultMarker(ROUTE.start));
+ //  map.addChild(new YMapDefaultMarker(ROUTE.start));
  map.addChild(new YMapDefaultMarker(ROUTE.end));
 
  const markerElement = document.createElement("div");
@@ -294,6 +334,30 @@ async function main() {
  );
  map.addChild(marker);
 
+ var i = 0;
+ setInterval(async () => {
+  var loc = lonLats[i];
+  // marker.update({ coordinates: loc as LngLat });
+  if (isPointInLine(loc)) {
+   routeProgress(0, loc as LngLat);
+  } else {
+   route = await fetchRoute(loc as LngLat, ROUTE.end.coordinates);
+   routeProgress(0, loc as LngLat);
+  }
+  i++;
+ }, 500);
+
+ function isPointInLine(coordinate: number[]) {
+  const allowedErrorMetrs = 200;
+  const line = lineString(route.geometry.coordinates);
+  const nearestLinePoint = nearestPointOnLine(line, coordinate, {
+   units: "meters",
+  });
+
+  const dist = nearestLinePoint.properties.dist;
+
+  return allowedErrorMetrs > dist;
+ }
  map
   .addChild(
    new YMapControls({ position: "bottom" }, [
@@ -302,7 +366,7 @@ async function main() {
       const animationId = animation.getAnimationId();
       cancelAnimationFrame(animationId);
       marker.update({ coordinates: ROUTE.start.coordinates });
-      routeProgress(0);
+      // routeProgress(0);
      },
     }),
    ])
@@ -320,14 +384,7 @@ async function main() {
    ])
   );
 
- let counter = 0;
-
- setInterval(() => {
-  console.log(counter++);
-  console.log(counter);
- }, 10000);
-
- const route = await fetchRoute(ROUTE.start.coordinates, ROUTE.end.coordinates);
+ let route = await fetchRoute(ROUTE.start.coordinates, ROUTE.end.coordinates);
 
  const routeLength = length(lineString(route.geometry as any), {
   units: "meters",
@@ -336,13 +393,13 @@ async function main() {
  lineStringFirstPart.update({ geometry: route.geometry });
 
  map.addChild(lineStringFirstPart);
- map.addChild(lineStringSecondPart);
- routeProgress(0);
+ // map.addChild(lineStringSecondPart);
+ //  routeProgress(0);
 }
 
 async function getToken(
- assignmentId: string = "a487c7a1-6f8b-469e-bd62-1c6688df1d82",
- createdAt: string = "2025-06-18T16:25:51.138427+05:00"
+ assignmentId: string = "4a1fb2c7-dd3b-4c7e-a2f9-a4ce8570729e",
+ createdAt: string = "2025-06-19T17:34:53.642273+05:00"
 ) {
  return fetch(
   `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/get-token?assignmentId=${assignmentId}&createdAt=${createdAt}`
@@ -351,13 +408,13 @@ async function getToken(
 
 async function getAssignments() {
  return fetch(
-  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/assignments/hbCt-UsCRGgLF_I_ohwAIhWUsJ4XyE37KJ0mRDRy7FY.`
+  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/assignments/fIaby78fVeYWnGjcXpbJWsLwsv2HvaWqrsl-ffR2gL0.`
  );
 }
 
 async function getBrigadeLocation(
  id: string = "09fc261e-c281-49be-8d7d-af8f2169f5c5",
- token: string = "hbCt-UsCRGgLF_I_ohwAIhWUsJ4XyE37KJ0mRDRy7FY."
+ token: string = "fIaby78fVeYWnGjcXpbJWsLwsv2HvaWqrsl-ffR2gL0."
 ) {
  return fetch(
   `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/brigade-location/${id}?token=${token}`

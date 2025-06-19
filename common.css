@@ -4,6 +4,16 @@
     transform: translate(-50%, -50%) scale(0.5);
 }
 
+.marker {
+  width: 32px;
+  height: 32px;
+  background-image: url('/icons/car.png'); /* Replace with your marker path */
+  background-size: contain;
+  background-repeat: no-repeat;
+  transform-origin: center;
+}
+
+
 .container {
     display: flex;
     align-items: center;
