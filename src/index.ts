@@ -173,10 +173,6 @@ async function main() {
    prevCoordinates = nextCoordinates;
    passedDistance = length;
    passedTime = timeS;
-
-   //  if (progress === 1 && routeLength > length) {
-   //   routeProgress(length);
-   //  }
   });
  };
 
@@ -261,8 +257,16 @@ async function main() {
   if (isPointInLine(location)) {
    routeProgress(location);
   } else {
-   route = await fetchRoute(location, ROUTE.end.coordinates);
+   route = await fetchRoute(
+    lastChangedCoordinates,
+    ROUTE.end.coordinates,
+    location
+   );
    passedDistance = 0;
+   lastChangedCoordinates = null;
+   prevCoordinates = null;
+
+   // Route Progress
    routeProgress(location);
   }
   i++;

@@ -19,11 +19,16 @@ ymaps3.ready.then(() => {
 
 export async function fetchRoute(
  startCoordinates: LngLat,
- endCoordinates: LngLat
+ endCoordinates: LngLat,
+ midCoordinates: LngLat = null
 ) {
+  let points = [startCoordinates, endCoordinates];
+  if (midCoordinates) {
+    points = [startCoordinates, midCoordinates, endCoordinates]
+  }
  // Request a route from the Router API with the specified parameters.
  const routes = await ymaps3.route({
-  points: [startCoordinates, endCoordinates], // Start and end points of the route LngLat[]
+  points: points, // Start and end points of the route LngLat[]
   type: "driving", // Type of the route
   bounds: true, // Flag indicating whether to include route boundaries in the response
  });
