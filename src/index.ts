@@ -262,7 +262,6 @@ async function main() {
   const animationDistance = length(slicedLine, {units: "meters"});
   const driverSpeed = animationDistance / ((ANIMATE_DURATION_MS - 10) / 1000);
   let passedTime = 0;
-  debugger;
 
   if (animationDistance < 1)
   {
@@ -303,10 +302,6 @@ async function main() {
     prevCoordinates = nextCoordinates;
     passedDistance = length;
     passedTime = timeS;
-
-   //  if (progress === 1 && routeLength > length) {
-   //   routeProgress(length);
-   //  }
   });
  };
 
@@ -362,11 +357,20 @@ async function main() {
  setInterval(async () => {
   var loc = lonLats[i];
 
-  if (isPointInLine(loc)) {
+  if (isPointInLine(loc))
+  {
    routeProgress(loc as LngLat);
-  } else {
-   route = await fetchRoute(loc as LngLat, ROUTE.end.coordinates);
+  }
+  else
+  {
+   route = await fetchRoute(lastChangedCoordinates, ROUTE.end.coordinates, loc as LngLat);
+
+   // Reset
    passedDistance = 0;
+   lastChangedCoordinates = null;
+   prevCoordinates = null;
+
+   // Route Progress
    routeProgress(loc as LngLat);
   }
   i++;
