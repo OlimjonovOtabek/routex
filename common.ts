@@ -40,7 +40,7 @@ export async function fetchRoute(
  return route;
 }
 
-export const ANIMATE_DURATION_MS = 1000000;
+export const ANIMATE_DURATION_MS = 1000;
 export type DriverAnimation = {
  getAnimationId: () => number;
 };
@@ -62,7 +62,7 @@ export function animate(cb: (progress: number) => void): DriverAnimation {
  animationId = requestAnimationFrame(tick);
 
  return {
-  getAnimationId: () => animationId,
+  getAnimationId: () => animationId
  };
 }
 

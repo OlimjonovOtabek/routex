@@ -4,9 +4,13 @@ import {
  lineString,
  nearestPointOnLine,
  point,
+ along,
+ lineSliceAlong,
+ lineSlice
 } from "@turf/turf";
-import { type LngLat } from "@yandex/ymaps3-types";
+import { LngLat } from "@yandex/ymaps3-types";
 import {
+    ANIMATE_DURATION_MS,
  DriverAnimation,
  angleFromCoordinate,
  animate,
@@ -112,8 +116,8 @@ async function main() {
   [69.228386, 41.287335],
   [69.228634, 41.287556],
  ];
- const locationBrigade = await (await getBrigadeLocation()).text();
- console.log(locationBrigade);
+//  const locationBrigade = await (await getBrigadeLocation()).text();
+//  console.log(locationBrigade);
  //  Waiting for all api elements to be loaded
  await ymaps3.ready;
  const {
@@ -243,42 +247,62 @@ async function main() {
  }
 
  let animation: DriverAnimation;
- let driverSpeed = INITIAL_DRIVER_SPEED;
+ let lastChangedCoordinates: LngLat;
  let prevCoordinates: LngLat;
+ let passedDistance = 0;
 
- const routeProgress = (initDistance: number, nextCoordinates: LngLat) => {
-  let passedDistance = initDistance;
+ const routeProgress = (coordinates: LngLat) => {
+  console.log("routeProgress is called!", coordinates);
+  if (!lastChangedCoordinates)
+  {
+    lastChangedCoordinates = route.geometry.coordinates[0];
+  }
+
+  const slicedLine = lineSlice(lastChangedCoordinates, coordinates, route.geometry)
+  const animationDistance = length(slicedLine, {units: "meters"});
+  const driverSpeed = animationDistance / ((ANIMATE_DURATION_MS - 10) / 1000);
   let passedTime = 0;
+  debugger;
 
-  let knownRoute = {} as any;
+  if (animationDistance < 1)
+  {
+    return;
+  }
+
+  lastChangedCoordinates = coordinates;
 
   animation = animate((progress) => {
-   //  const timeS = (progress * ANIMATE_DURATION_MS) / 1000;
-   //  const length = passedDistance + driverSpeed * (timeS - passedTime);
+    const timeS = (progress * ANIMATE_DURATION_MS) / 1000;
+    const length = passedDistance + driverSpeed * (timeS - passedTime);
 
-   // const nextCoordinates = along(knownRoute.geometry, 1, {
-   //  units: "meters",
-   // }).geometry.coordinates as LngLat;
-   debugger;
-   marker.update({ coordinates: nextCoordinates });
-   if (
-    prevCoordinates &&
-    !booleanEqual(point(prevCoordinates), point(nextCoordinates))
-   ) {
-    const angle = angleFromCoordinate(prevCoordinates, nextCoordinates);
-    const markerElement = document.getElementById("marker");
-    markerElement.style.transform = `rotate(${angle}deg)`;
-   }
+    // Calculate the next location
+    const nextCoordinates = along(route.geometry, length, {
+        units: "meters",
+    }).geometry.coordinates as LngLat;
 
-   const [newLineStingFirstPart, newLineStringSecondPart] = splitLineString(
-    route,
-    nextCoordinates
-   );
-   lineStringFirstPart.update({ geometry: newLineStingFirstPart });
+    // Update the coordinates
+    marker.update({ coordinates: nextCoordinates });
 
-   prevCoordinates = nextCoordinates;
-   //  passedTime = timeS;
-   //  passedDistance = length;
+    // Correct the angles
+    if (
+        prevCoordinates &&
+        !booleanEqual(point(prevCoordinates), point(nextCoordinates))
+    ) {
+        const angle = angleFromCoordinate(prevCoordinates, nextCoordinates);
+        const markerElement = document.getElementById("marker");
+        markerElement.style.transform = `rotate(${angle}deg)`;
+    }
+
+    // Correct the line
+    const [newLineStingFirstPart, newLineStringSecondPart] = splitLineString(
+        route,
+        nextCoordinates
+    );
+    lineStringFirstPart.update({ geometry: newLineStingFirstPart });
+
+    prevCoordinates = nextCoordinates;
+    passedDistance = length;
+    passedTime = timeS;
 
    //  if (progress === 1 && routeLength > length) {
    //   routeProgress(length);
@@ -337,26 +361,34 @@ async function main() {
  var i = 0;
  setInterval(async () => {
   var loc = lonLats[i];
-  // marker.update({ coordinates: loc as LngLat });
+
   if (isPointInLine(loc)) {
-   routeProgress(0, loc as LngLat);
+   routeProgress(loc as LngLat);
   } else {
    route = await fetchRoute(loc as LngLat, ROUTE.end.coordinates);
-   routeProgress(0, loc as LngLat);
+   passedDistance = 0;
+   routeProgress(loc as LngLat);
   }
   i++;
- }, 500);
+ }, ANIMATE_DURATION_MS);
 
  function isPointInLine(coordinate: number[]) {
-  const allowedErrorMetrs = 200;
-  const line = lineString(route.geometry.coordinates);
-  const nearestLinePoint = nearestPointOnLine(line, coordinate, {
-   units: "meters",
-  });
+  const allowedErrorMetrs = 50;
+  const nearestLinePoint = getNearestPointInLine(coordinate);
 
   const dist = nearestLinePoint.properties.dist;
 
   return allowedErrorMetrs > dist;
+ }
+
+ function getNearestPointInLine(coordinate: number[]){
+
+  const line = lineString(route.geometry.coordinates);
+  const nearestLinePoint = nearestPointOnLine(line, coordinate, {
+   units: "meters",
+  })
+
+  return nearestLinePoint;
  }
  map
   .addChild(
@@ -378,7 +410,7 @@ async function main() {
      min: MIN_DRIVER_SPEED,
      max: MAX_DRIVER_SPEED,
      onChange: (value) => {
-      driverSpeed = value;
+    //   driverSpeed = value;
      },
     }),
    ])

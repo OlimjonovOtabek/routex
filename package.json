@@ -2,12 +2,11 @@
   "name": "yandex-map-brigade-tracker",
   "version": "1.0.0",
   "description": "Yandex Map 3.0 brigade tracking application with real-time updates and animations.",
-  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf dist",             
-    "compile": "tsc",                   
-    "watch": "tsc --watch",             
-    "start": "live-server dist"         
+    "clean": "rimraf dist",
+    "compile": "tsc",
+    "watch": "tsc --watch",
+    "start": "serve ."
   },
   "keywords": [
     "yandex-maps",
@@ -16,19 +15,17 @@
     "tracking",
     "frontend"
   ],
-  "author": "Your Name/Organization",   
-  "license": "MIT",                     
+  "author": "Your Name/Organization",
+  "license": "MIT",
   "dependencies": {
-    "@turf/turf": "^7.0.0",             
-    "ymaps3": "0.0.12",                 
-    "@yandex/ymaps3-default-ui-theme": "0.0.12" 
+    "@turf/turf": "^7.0.0",
+    "@yandex/ymaps3-default-ui-theme": "^0.0.19",
+    "@yandex/ymaps3-types": "^1.0.16743011"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",             
-    "@types/node": "^20.0.0",          
-    "@types/turf__turf": "^6.5.1",     
-    "live-server": "^1.2.2",           
-    "rimraf": "^5.0.0",                 
-    "@yandex/ymaps3-types": "^0.0.12"  
+    "@types/node": "^20.0.0",
+    "live-server": "^1.2.2",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0"
   }
 }
