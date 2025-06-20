@@ -45,8 +45,46 @@
   <link rel="stylesheet" href="../common.css" />
  </head>
  <body>
+  <!-- <div class="toolbar-wrapper" style="width: 100%">
+   <div class="toolbar">
+    <span class="content">103</span>
+   </div>
+  </div> -->
   <div class="map-container">
-   <div id="map" style="width: 100%; height: 100vh"></div>
+   <div id="map" style="width: 100%; height: 100vh">
+    <ymaps3
+     class="ymaps3--popup-marker_container"
+     style="z-index: 10000l; bottom: auto; top: 0"
+     id="header-content"
+     ><div class="balloon" style="width: 100%" id="balloon">
+      <p class="title">103</p>
+     </div></ymaps3
+    >
+    <ymaps3
+     class="ymaps3--popup-marker_container"
+     style="z-index: 10000"
+     id="popup-content"
+     ><div class="balloon" id="balloon">
+      <p class="title">ОПВ #1</p>
+      <p class="description">
+       ГОРОД ТАШКЕНТ, М.УЛУГБЕКСКИЙ РАЙОН, ул.:Do‘rmon yo‘li ko‘chasi, дом:0,
+      </p>
+      <p class="description">
+       <span class="description">Дополнительная информация</span>
+      </p>
+     </div></ymaps3
+    >
+   </div>
   </div>
+
+  <!-- <div class="popup-content">
+   <div class="popup-header">
+    <h2>Информация о точке</h2>
+    <button id="close-popup">Закрыть</button>
+   </div>
+   <div class="popup-body">
+    <p>Здесь будет информация о выбранной точке.</p>
+   </div>
+  </div> -->
  </body>
 </html>

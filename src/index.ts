@@ -12,6 +12,7 @@ import { LngLat } from "@yandex/ymaps3-types";
 import {
  ANIMATE_DURATION_MS,
  DriverAnimation,
+ SpeedRange,
  angleFromCoordinate,
  animate,
  fetchRoute,
@@ -29,6 +30,75 @@ import {
 window.map = null;
 let TOKEN: string;
 let ASSIGNMENT: Assignment;
+
+// const LON_LATS = [
+//  [69.220053, 41.275767],
+//  [69.22013, 41.275758],
+//  [69.220154, 41.275751],
+//  [69.220232, 41.275712],
+//  [69.220253, 41.275692],
+//  [69.220257, 41.275667],
+//  [69.22023, 41.275532],
+//  [69.220205, 41.275383],
+//  [69.22028, 41.27537],
+//  [69.220373, 41.275351],
+//  [69.220458, 41.275329],
+//  [69.220514, 41.27531],
+//  [69.220565, 41.275285],
+//  [69.221226, 41.274872],
+//  [69.221615, 41.275215],
+//  [69.22192, 41.275487],
+//  [69.222045, 41.275598],
+//  [69.222198, 41.275734],
+//  [69.222303, 41.275823],
+//  [69.222363, 41.275875],
+//  [69.22203, 41.27609],
+//  [69.221014, 41.276755],
+//  [69.22054, 41.277072],
+//  [69.220486, 41.277105],
+//  [69.219734, 41.277567],
+//  [69.219428, 41.277755],
+//  [69.218649, 41.278248],
+//  [69.217943, 41.278691],
+//  [69.217783, 41.278807],
+//  [69.217878, 41.278883],
+//  [69.218018, 41.278995],
+//  [69.21839, 41.279301],
+//  [69.218771, 41.279586],
+//  [69.218893, 41.279679],
+//  [69.219219, 41.279916],
+//  [69.219553, 41.28015],
+//  [69.220089, 41.280524],
+//  [69.220121, 41.280547],
+//  [69.221028, 41.281187],
+//  [69.221601, 41.281587],
+//  [69.221806, 41.281737],
+//  [69.221966, 41.281854],
+//  [69.222317, 41.282095],
+//  [69.222852, 41.28247],
+//  [69.222919, 41.282518],
+//  [69.223047, 41.282609],
+//  [69.223323, 41.282801],
+//  [69.223774, 41.283167],
+//  [69.224083, 41.283447],
+//  [69.224172, 41.283529],
+//  [69.224382, 41.283721],
+//  [69.224723, 41.284038],
+//  [69.224827, 41.284134],
+//  [69.224977, 41.284266],
+//  [69.225013, 41.284298],
+//  [69.225341, 41.284586],
+//  [69.22649, 41.285619],
+//  [69.226761, 41.285864],
+//  [69.226841, 41.285934],
+//  [69.227011, 41.286084],
+//  [69.227266, 41.286319],
+//  [69.22732, 41.286369],
+//  [69.227488, 41.286522],
+//  [69.228386, 41.287335],
+//  [69.228634, 41.287556],
+// ];
+
 main();
 
 async function fetchAssignment(token: string) {
@@ -39,6 +109,7 @@ async function fetchAssignment(token: string) {
  }
 
  const assignment: Assignment = await response.json();
+ ASSIGNMENT = assignment;
 
  ROUTE.start.coordinates = [
   assignment.brigadeLocation.latitude,
@@ -54,7 +125,7 @@ async function fetchAssignment(token: string) {
 }
 
 async function main() {
- TOKEN = window.location.search.split("=")[1] || "";
+ TOKEN = new URLSearchParams(window.location.search).get("token");
 
  if (!TOKEN) {
   console.error("No token provided in the URL");
@@ -78,7 +149,7 @@ async function main() {
  } = ymaps3;
 
  // Import the package to add a default marker
- const { YMapDefaultMarker, YMapPopupMarker } = await ymaps3.import(
+ const { YMapDefaultMarker } = await ymaps3.import(
   "@yandex/ymaps3-default-ui-theme"
  );
 
@@ -97,22 +168,23 @@ async function main() {
  );
  let show = false;
  const updatePopupContent = async () => {
-  const object: Assignment = await (await getAssignments(TOKEN)).json();
+  const object: Assignment = ASSIGNMENT;
+
   const popupContent = document.getElementById("balloon");
   if (object && popupContent) {
    popupContent.innerHTML = `
         <p class="title">${object.nameRu}</p>
         <p class="description">${object.destinationFullAddressLine}</p>
         <p class="description">
-          ${object.brigadePlateNumber}
+          ${object.brigadePlateNumber ?? ""}
         </p>
       `;
   }
  };
  const handleMarkerClick = () => {
   show = !show;
-  marker.update({ popup: { show } as MarkerPopupProps } as any);
-  setTimeout(updatePopupContent, 3000);
+  marker.update({ popup: { show } as MarkerPopupProps });
+  setTimeout(updatePopupContent, 1000);
  };
 
  let animation: DriverAnimation;
@@ -206,7 +278,7 @@ async function main() {
  //  map.addChild(new YMapDefaultMarker(ROUTE.start));
  map.addChild(new YMapDefaultMarker(ROUTE.end));
 
- const markerElement = document.createElement("div");
+ const markerElement = document.getElementById("marker");
  markerElement.classList.add("marker_container");
 
  const markerElementImg = document.createElement("img");
@@ -230,18 +302,16 @@ async function main() {
     `;
   return content;
  };
- const marker = new YMapMarker(
-  {
-   coordinates: ROUTE.start.coordinates,
-   onClick: handleMarkerClick,
-   popup: {
-    show,
-    content: createPopupContent,
-   },
-   disableRoundCoordinates: true,
-  } as any,
-  markerElement
- );
+ const marker = new YMapDefaultMarker({
+  coordinates: ROUTE.start.coordinates,
+  onClick: handleMarkerClick,
+  popup: {
+   show,
+   content: createPopupContent,
+  },
+  iconName: "car",
+  disableRoundCoordinates: true,
+ });
  map.addChild(marker);
 
  var i = 0;
@@ -255,19 +325,19 @@ async function main() {
    brigadeLocation.longitude,
   ];
   if (isPointInLine(location)) {
-   routeProgress(location);
+   routeProgress(location as LngLat);
   } else {
    route = await fetchRoute(
     lastChangedCoordinates,
     ROUTE.end.coordinates,
-    location
+    location as any
    );
    passedDistance = 0;
    lastChangedCoordinates = null;
    prevCoordinates = null;
 
    // Route Progress
-   routeProgress(location);
+   routeProgress(location as LngLat);
   }
   i++;
  }, ANIMATE_DURATION_MS);
@@ -299,6 +369,18 @@ async function main() {
  lineStringFirstPart.update({ geometry: route.geometry });
 
  map.addChild(lineStringFirstPart);
+ map.addChild(
+  new YMapControls(
+   {
+    position: "top right",
+   },
+   [
+    new SpeedRange({
+     content: "popup-content",
+    }),
+   ]
+  )
+ );
  // map.addChild(lineStringSecondPart);
  //  routeProgress(0);
 }
@@ -313,17 +395,19 @@ async function getToken(
 }
 
 async function getAssignments(token: string) {
+ const params = new URLSearchParams();
+ params.append("token", token);
  return fetch(
-  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/assignments/${token}`
+  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/assignments?${params.toString()}`
  );
 }
 
-async function getBrigadeLocation(
- id: string = "09fc261e-c281-49be-8d7d-af8f2169f5c5",
- token: string = "fIaby78fVeYWnGjcXpbJWsLwsv2HvaWqrsl-ffR2gL0."
-) {
+async function getBrigadeLocation(id: string, token: string) {
+ const params = new URLSearchParams();
+ params.append("token", token);
+
  return fetch(
-  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/brigade-location/${id}?token=${token}`
+  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/brigade-location/${id}?${params.toString()}`
  );
 }
 

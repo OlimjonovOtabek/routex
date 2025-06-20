@@ -1,4 +1,5 @@
 import { cleanCoords, lineSlice } from "@turf/turf";
+import { MarkerPopupProps } from "@yandex/ymaps3-default-ui-theme";
 import type {
  LineStringGeometry,
  LngLat,
@@ -17,15 +18,34 @@ ymaps3.ready.then(() => {
  );
 });
 
+type SpeedRangeProps = {
+ onChange: (value: number) => void;
+ initialValue: number;
+ min: number;
+ max: number;
+};
+export class SpeedRange extends ymaps3.YMapComplexEntity<MarkerPopupProps> {
+ private _element!: HTMLDivElement;
+ private _input!: HTMLInputElement;
+
+ // Method for create a DOM control element
+ _createElement() {
+  const container = document.getElementById("popup-content");
+
+  if (!container) return;
+
+  return container;
+ }
+}
 export async function fetchRoute(
  startCoordinates: LngLat,
  endCoordinates: LngLat,
  midCoordinates: LngLat = null
 ) {
-  let points = [startCoordinates, endCoordinates];
-  if (midCoordinates) {
-    points = [startCoordinates, midCoordinates, endCoordinates]
-  }
+ let points = [startCoordinates, endCoordinates];
+ if (midCoordinates) {
+  points = [startCoordinates, midCoordinates, endCoordinates];
+ }
  // Request a route from the Router API with the specified parameters.
  const routes = await ymaps3.route({
   points: points, // Start and end points of the route LngLat[]
