@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  app:
+    image: nginx:alpine
+    ports:
+      - "8000:80"  # Change this if your app runs on a different port
+    volumes:
+      - ./:/usr/share/nginx/html
