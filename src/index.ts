@@ -208,9 +208,16 @@ async function main() {
             brigadeLocation.latitude,
             brigadeLocation.longitude,
         ];
+
+        // pass if no change
+        if (location == lastChangedCoordinates)
+            return;
+
         if (isPointInLine(location)) {
-            routeProgress(location as LngLat);
-        } else {
+            routeProgress(location);
+        }
+        else
+        {
             route = await fetchRoute(
                 lastChangedCoordinates,
                 ROUTE.end.coordinates,
@@ -221,7 +228,7 @@ async function main() {
             prevCoordinates = null;
 
             // Route Progress
-            routeProgress(location as LngLat);
+            routeProgress(location);
         }
         i++;
     }, ANIMATE_DURATION_MS);
@@ -236,8 +243,8 @@ async function main() {
     }
 
     function getNearestPointInLine(coordinate: number[]) {
-        const line = lineString(route.geometry.coordinates);
-        const nearestLinePoint = nearestPointOnLine(line, coordinate, {
+        const currentLine = lineString(route.geometry.coordinates);
+        const nearestLinePoint = nearestPointOnLine(currentLine, point(coordinate), {
             units: "meters",
         });
 
