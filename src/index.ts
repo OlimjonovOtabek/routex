@@ -12,7 +12,7 @@ import { LngLat } from "@yandex/ymaps3-types";
 import {
  ANIMATE_DURATION_MS,
  DriverAnimation,
- SpeedRange,
+ PopupComponent,
  angleFromCoordinate,
  animate,
  fetchRoute,
@@ -65,7 +65,7 @@ function fetchPopupContent(assignment: Assignment) {
  if (assignment && popupContent) {
   popupContent.innerHTML = `
   <div class='balloon' id="balloon">
-  
+
   <p class="title">${assignment.nameRu}</p>
   <p class="description">${assignment.destinationFullAddressLine}</p>
   <p class="description">
@@ -323,7 +323,7 @@ async function main() {
     position: "top right",
    },
    [
-    new SpeedRange({
+    new PopupComponent({
      content: "popup-content",
     }),
    ]

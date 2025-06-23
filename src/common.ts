@@ -1,9 +1,10 @@
 import { cleanCoords, lineSlice } from "@turf/turf";
 import { MarkerPopupProps } from "@yandex/ymaps3-default-ui-theme";
-import type {
- LineStringGeometry,
- LngLat,
- RouteFeature,
+import {
+  YMapComplexEntity,
+ type LineStringGeometry,
+ type LngLat,
+ type RouteFeature,
 } from "@yandex/ymaps3-types";
 
 // Wait for the api to load to access the map configuration
@@ -18,25 +19,6 @@ ymaps3.ready.then(() => {
  );
 });
 
-type SpeedRangeProps = {
- onChange: (value: number) => void;
- initialValue: number;
- min: number;
- max: number;
-};
-export class SpeedRange extends ymaps3.YMapComplexEntity<MarkerPopupProps> {
- private _element!: HTMLDivElement;
- private _input!: HTMLInputElement;
-
- // Method for create a DOM control element
- _createElement() {
-  const container = document.getElementById("popup-content");
-
-  if (!container) return;
-
-  return container;
- }
-}
 export async function fetchRoute(
  startCoordinates: LngLat,
  endCoordinates: LngLat,
@@ -114,6 +96,19 @@ export async function getBrigadeLocation(
   `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/brigade-location/${id}?token=oJTfJVA1qQl5YFKEWmgaeAHHKTXFmQVkFwHap7iuP-I.`
  );
 }
+
+
+export class PopupComponent extends YMapComplexEntity<MarkerPopupProps> {
+
+  // Method for create a DOM control element
+  _createElement() {
+   const container = document.getElementById("popup-content");
+
+   if (!container) return;
+
+   return container;
+  }
+ }
 
 export function angleFromCoordinate(lngLat1: LngLat, lngLat2: LngLat) {
  const toRadians = (degrees: number) => degrees * (Math.PI / 180);
