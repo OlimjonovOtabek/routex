@@ -151,12 +151,7 @@ async function main() {
                 prevCoordinates &&
                 !booleanEqual(point(prevCoordinates), point(nextCoordinates))
             ) {
-                const angle = angleFromCoordinate(
-                    prevCoordinates,
-                    nextCoordinates
-                );
-                const markerElement = document.getElementById("marker");
-                markerElement.style.transform = `rotate(${angle}deg)`;
+                angleProgress(nextCoordinates);
             }
 
             // Correct the line
@@ -232,6 +227,15 @@ async function main() {
         }
         i++;
     }, ANIMATE_DURATION_MS);
+
+    function angleProgress(nextCoordinates: LngLat) {
+        const angle = angleFromCoordinate(
+            prevCoordinates,
+            nextCoordinates
+        );
+        const markerElement = document.getElementById("marker");
+        markerElement.style.transform = `rotate(${angle}deg)`;
+    }
 
     function isPointInLine(coordinate: number[]) {
         const allowedErrorMetrs = 50;
