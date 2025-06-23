@@ -7,8 +7,6 @@ import {
  nearestPointOnLine,
  point,
 } from "@turf/turf";
-import { MarkerPopupProps } from "@yandex/ymaps3-default-ui-theme";
-import { LngLat } from "@yandex/ymaps3-types";
 import {
  ANIMATE_DURATION_MS,
  DriverAnimation,
@@ -21,10 +19,10 @@ import {
 import {
  LOCATION,
  MARKER_IMAGE_PATH,
- PASSED_ROUTE_STYLE,
  ROUTE,
  ROUTE_STYLE,
 } from "./variables";
+import { LngLat } from "@yandex/ymaps3-types";
 
 window.map = null;
 let TOKEN: string;
@@ -51,6 +49,7 @@ async function fetchAssignment(token: string) {
   assignment.brigadeLocation.longitude,
  ];
  ROUTE.start.title = assignment.nameRu;
+ ROUTE.start.subtitle = assignment.brigadePlateNumber;
 
  ROUTE.end.coordinates = [
   assignment.destinationLocation.longitude,
@@ -92,8 +91,7 @@ async function main() {
   YMapDefaultSchemeLayer,
   YMapDefaultFeaturesLayer,
   YMapFeature,
-  YMapControls,
-  YMapControl,
+  YMapMarker
  } = ymaps3;
 
  // Import the package to add a default marker
@@ -114,26 +112,6 @@ async function main() {
    new YMapDefaultFeaturesLayer({}),
   ]
  );
- let show = false;
- const updatePopupContent = async () => {
-  const object: Assignment = ASSIGNMENT;
-
-  const popupContent = document.getElementById("balloon");
-  if (object && popupContent) {
-   popupContent.innerHTML = `
-        <p class="title">${object.nameRu}</p>
-        <p class="description">${object.destinationFullAddressLine}</p>
-        <p class="description">
-          ${object.brigadePlateNumber ?? ""}
-        </p>
-      `;
-  }
- };
- const handleMarkerClick = () => {
-  show = !show;
-  marker.update({ popup: { show } as MarkerPopupProps });
-  setTimeout(updatePopupContent, 1000);
- };
 
  let animation: DriverAnimation;
  let lastChangedCoordinates: LngLat;
@@ -141,7 +119,6 @@ async function main() {
  let passedDistance = 0;
 
  const routeProgress = (coordinates: LngLat) => {
-  console.log("routeProgress is called!", coordinates);
   if (!lastChangedCoordinates) {
    lastChangedCoordinates = route.geometry.coordinates[0];
   }
@@ -205,60 +182,23 @@ async function main() {
   zoom: 13,
  });
 
- const lineStringSecondPart = new YMapFeature({
-  geometry: { coordinates: [], type: "LineString" },
-  style: PASSED_ROUTE_STYLE,
- });
-
  const lineStringFirstPart = new YMapFeature({
   geometry: { coordinates: [], type: "LineString" },
   style: ROUTE_STYLE,
  });
 
- const location = getCenterCoordinate(
-  ROUTE.start.coordinates,
-  ROUTE.end.coordinates
- );
- map.setLocation({
-  center: location as any,
-  zoom: 13,
- });
  map.addChild(new YMapDefaultMarker(ROUTE.end));
 
- const markerElement = document.getElementById("marker");
- markerElement.classList.add("marker_container");
+ const markerElement = document.createElement('div');
+ markerElement.classList.add('marker_container');
 
- const markerElementImg = document.createElement("img");
+ const markerElementImg = document.createElement('img');
  markerElementImg.src = MARKER_IMAGE_PATH;
- markerElementImg.alt = "marker";
- markerElementImg.id = "marker";
+ markerElementImg.alt = 'marker';
+ markerElementImg.id = 'marker';
  markerElement.appendChild(markerElementImg);
 
- const createPopupContent = () => {
-  const content = document.createElement("div");
-  content.classList.add("balloon");
-  content.id = "balloon";
-  content.innerHTML = `
-      <p class="skeleton-title"></p>
-      <div class="description-container">
-        <p class="skeleton-description w60"></p>
-        <p class="skeleton-description w80"></p>
-        <p class="skeleton-description w70"></p>
-        <p class="skeleton-description w40"></p>
-      </div>
-    `;
-  return content;
- };
- const marker = new YMapDefaultMarker({
-  coordinates: ROUTE.start.coordinates,
-  onClick: handleMarkerClick,
-  popup: {
-   show,
-   content: createPopupContent,
-  },
-  iconName: "car",
-  disableRoundCoordinates: true,
- });
+ const marker = new YMapMarker(ROUTE.start, markerElement);
  map.addChild(marker);
 
  var i = 0;
@@ -309,27 +249,9 @@ async function main() {
 
  let route = await fetchRoute(ROUTE.start.coordinates, ROUTE.end.coordinates);
 
- const routeLength = length(lineString(route.geometry as any), {
-  units: "meters",
- });
-
  lineStringFirstPart.update({ geometry: route.geometry });
 
  map.addChild(lineStringFirstPart);
- map.addChild(
-  new YMapControls({
-   position: "top right",
-  })
- );
-}
-
-async function getToken(
- assignmentId: string = "4a1fb2c7-dd3b-4c7e-a2f9-a4ce8570729e",
- createdAt: string = "2025-06-19T17:34:53.642273+05:00"
-) {
- return fetch(
-  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/get-token?assignmentId=${assignmentId}&createdAt=${createdAt}`
- );
 }
 
 async function getAssignments(token: string) {

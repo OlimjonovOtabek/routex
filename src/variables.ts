@@ -18,7 +18,6 @@ export const ROUTE: {
   zIndex: 1000,
   size: "small",
   title: "BePro-Devhub",
-  iconName: "building",
   coordinates: [69.220053, 41.275767],
  },
  end: {

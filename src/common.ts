@@ -7,7 +7,6 @@ import {
 
 // Wait for the api to load to access the map configuration
 ymaps3.ready.then(() => {
- const { YMapComplexEntity } = ymaps3;
  // Copy your api key for routes from the developer's dashboard and paste it here
  ymaps3
   .getDefaultConfig()
@@ -71,41 +70,6 @@ export function animate(cb: (progress: number) => void): DriverAnimation {
  };
 }
 
-export async function getToken(
- assignmentId: string = "6fed6b78-47c6-4de9-b033-ad4b5d3da7a3",
- createdAt: string = "2025-06-19T12:26:59.155017+05:00"
-) {
- return fetch(
-  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/get-token?assignmentId=${assignmentId}&createdAt=${createdAt}`
- );
-}
-
-export async function getAssignments() {
- return fetch(
-  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/assignments/oJTfJVA1qQl5YFKEWmgaeAHHKTXFmQVkFwHap7iuP-I.`
- );
-}
-
-export async function getBrigadeLocation(
- id: string = "09fc261e-c281-49be-8d7d-af8f2169f5c5",
- token: string = "hbCt-UsCRGgLF_I_ohwAIhWUsJ4XyE37KJ0mRDRy7FY."
-) {
- return fetch(
-  `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/brigade-location/${id}?token=oJTfJVA1qQl5YFKEWmgaeAHHKTXFmQVkFwHap7iuP-I.`
- );
-}
-
-// export class PopupComponent extends YMapComplexEntity<MarkerPopupProps> {
-//  // Method for create a DOM control element
-//  _createElement() {
-//   const container = document.getElementById("popup-content");
-
-//   if (!container) return;
-
-//   return container;
-//  }
-// }
-
 export function angleFromCoordinate(lngLat1: LngLat, lngLat2: LngLat) {
  const toRadians = (degrees: number) => degrees * (Math.PI / 180);
  const toDegrees = (radians: number) => radians * (180 / Math.PI);
@@ -153,18 +117,4 @@ export function getCenterCoordinate(start: LngLat, end: LngLat): number[] {
  const centerLongitude = (start[0] + end[0]) / 2;
  const centerLatitude = (start[1] + end[1]) / 2;
  return [centerLongitude, centerLatitude];
-}
-
-// Helper function to remove consecutive duplicate coordinates
-function removeConsecutiveDuplicates(coords: number[][]): number[][] {
- if (!coords.length) return coords;
- const cleaned = [coords[0]];
- for (let i = 1; i < coords.length; i++) {
-  const [lon, lat] = coords[i];
-  const [prevLon, prevLat] = coords[i - 1];
-  if (lon !== prevLon || lat !== prevLat) {
-   cleaned.push(coords[i]);
-  }
- }
- return cleaned;
 }
