@@ -1,0 +1,36 @@
+# Prerequisites: $DEVHUB_REGISTRY, $DEVHUB_REGISTRY_USERNAME, $DEVHUB_REGISTRY_PASSWORD setup as deployment variables
+
+image: atlassian/default-image:3
+
+definitions:
+  services:
+    docker:
+      memory: 4096
+
+options:
+  size: 2x
+
+pipelines:
+  branches:
+    init:
+      - step:
+          name: Build And Push
+          script:
+            - DOCKERFILE_PATH=Dockerfile
+            - IMAGE_NAME=${DEVHUB_REGISTRY}/uds-ui-init
+            - VERSION="0.1.${BITBUCKET_BUILD_NUMBER}"
+            - docker build -f $DOCKERFILE_PATH -t ${IMAGE_NAME}:${VERSION} --build-arg app_env=test .
+            - echo ${DEVHUB_REGISTRY_PASSWORD} | docker login --username $DEVHUB_REGISTRY_USERNAME --password-stdin $DEVHUB_REGISTRY
+            - docker push -a ${IMAGE_NAME}
+          services:
+            - docker
+      - step:
+          name: Deploy
+          deployment: dev-init
+          script:
+            - STACKFILE_PATH=swarm/init/stack.yml
+            - export DOCKER_HOST=${DOCKER_HOST_INIT}
+            - export APPLICATION_VERSION="0.1.${BITBUCKET_BUILD_NUMBER}"
+            - wget --no-check-certificate --server-response --method POST http://103.init.uz:9000/api/webhooks/0a8d8063-982f-44d2-b1f9-23d84b31deb7?tag=$APPLICATION_VERSION
+          services:
+            - docker
