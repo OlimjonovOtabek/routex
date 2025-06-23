@@ -2,8 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: nginx:alpine
+    build: .
+    image: edwardkenway/uds-routex:latest
     ports:
       - "8000:80"  # Change this if your app runs on a different port
-    volumes:
-      - ./:/usr/share/nginx/html
