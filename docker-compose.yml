@@ -6,4 +6,4 @@ services:
     ports:
       - "8000:80"  # Change this if your app runs on a different port
     volumes:
-      - ./:/usr/share/nginx/html
+      - ./dist:/usr/share/nginx/html
