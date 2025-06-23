@@ -3,5 +3,6 @@ version: '3.8'
 services:
   app:
     build: .
+    image: edwardkenway/uds-routex:latest
     ports:
       - "8000:80"  # Change this if your app runs on a different port
