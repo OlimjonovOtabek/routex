@@ -109,6 +109,10 @@ async function fetchAssignment(token: string) {
  }
 
  const assignment: Assignment = await response.json();
+ if (!assignment) return;
+
+ fetchPopupContent(assignment);
+
  ASSIGNMENT = assignment;
 
  ROUTE.start.coordinates = [
@@ -122,6 +126,22 @@ async function fetchAssignment(token: string) {
   assignment.destinationLocation.latitude,
  ];
  ROUTE.end.title = assignment.destinationFullAddressLine ?? "";
+}
+
+function fetchPopupContent(assignment: Assignment) {
+ const popupContent = document.getElementById("popup-content");
+ if (assignment && popupContent) {
+  popupContent.innerHTML = `
+  <div class='balloon' id="balloon">
+  
+  <p class="title">${assignment.nameRu}</p>
+  <p class="description">${assignment.destinationFullAddressLine}</p>
+  <p class="description">
+  ${assignment.brigadePlateNumber ?? ""}
+  </p>
+  </div>
+        `;
+ }
 }
 
 async function main() {
