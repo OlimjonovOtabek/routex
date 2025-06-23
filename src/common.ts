@@ -1,7 +1,5 @@
 import { cleanCoords, lineSlice } from "@turf/turf";
-import { MarkerPopupProps } from "@yandex/ymaps3-default-ui-theme";
 import {
-  YMapComplexEntity,
  type LineStringGeometry,
  type LngLat,
  type RouteFeature,
@@ -9,6 +7,7 @@ import {
 
 // Wait for the api to load to access the map configuration
 ymaps3.ready.then(() => {
+ const { YMapComplexEntity } = ymaps3;
  // Copy your api key for routes from the developer's dashboard and paste it here
  ymaps3
   .getDefaultConfig()
@@ -18,7 +17,6 @@ ymaps3.ready.then(() => {
   "@yandex/ymaps3-default-ui-theme@0.0"
  );
 });
-
 export async function fetchRoute(
  startCoordinates: LngLat,
  endCoordinates: LngLat,
@@ -97,18 +95,16 @@ export async function getBrigadeLocation(
  );
 }
 
+// export class PopupComponent extends YMapComplexEntity<MarkerPopupProps> {
+//  // Method for create a DOM control element
+//  _createElement() {
+//   const container = document.getElementById("popup-content");
 
-export class PopupComponent extends YMapComplexEntity<MarkerPopupProps> {
+//   if (!container) return;
 
-  // Method for create a DOM control element
-  _createElement() {
-   const container = document.getElementById("popup-content");
-
-   if (!container) return;
-
-   return container;
-  }
- }
+//   return container;
+//  }
+// }
 
 export function angleFromCoordinate(lngLat1: LngLat, lngLat2: LngLat) {
  const toRadians = (degrees: number) => degrees * (Math.PI / 180);

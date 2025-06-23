@@ -12,7 +12,6 @@ import { LngLat } from "@yandex/ymaps3-types";
 import {
  ANIMATE_DURATION_MS,
  DriverAnimation,
- PopupComponent,
  angleFromCoordinate,
  animate,
  fetchRoute,
@@ -318,16 +317,9 @@ async function main() {
 
  map.addChild(lineStringFirstPart);
  map.addChild(
-  new YMapControls(
-   {
-    position: "top right",
-   },
-   [
-    new PopupComponent({
-     content: "popup-content",
-    }),
-   ]
-  )
+  new YMapControls({
+   position: "top right",
+  })
  );
 }
 
