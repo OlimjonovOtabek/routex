@@ -5,7 +5,7 @@ import {
     lineSlice,
     lineString,
     nearestPointOnLine,
-    point,
+    point
 } from "@turf/turf";
 import {
     ANIMATE_DURATION_MS,
@@ -16,7 +16,7 @@ import {
     getCenterCoordinate,
     splitLineString,
 } from "./common";
-import { LOCATION, MARKER_IMAGE_PATH, ROUTE, ROUTE_STYLE } from "./variables";
+import { BASE_URL, LOCATION, MARKER_IMAGE_SVG, ROUTE, ROUTE_STYLE } from "./variables";
 import { LngLat } from "@yandex/ymaps3-types";
 
 window.map = null;
@@ -24,50 +24,6 @@ let TOKEN: string;
 let ASSIGNMENT: Assignment;
 
 main();
-
-async function fetchAssignment(token: string) {
-    const response = await getAssignments(TOKEN);
-
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const assignment: Assignment = await response.json();
-    if (!assignment) return;
-
-    fetchPopupContent(assignment);
-
-    ASSIGNMENT = assignment;
-
-    ROUTE.start.coordinates = [
-        assignment.brigadeLocation.latitude,
-        assignment.brigadeLocation.longitude,
-    ];
-    ROUTE.start.title = assignment.nameRu;
-    ROUTE.start.subtitle = assignment.brigadePlateNumber;
-
-    ROUTE.end.coordinates = [
-        assignment.destinationLocation.longitude,
-        assignment.destinationLocation.latitude,
-    ];
-    ROUTE.end.title = assignment.destinationFullAddressLine ?? "";
-}
-
-function fetchPopupContent(assignment: Assignment) {
-    const popupContent = document.getElementById("popup-content");
-    if (assignment && popupContent) {
-        popupContent.innerHTML = `
-  <div class='balloon' id="balloon">
-
-  <p class="title">${assignment.nameRu}</p>
-  <p class="description">${assignment.destinationFullAddressLine}</p>
-  <p class="description">
-  ${assignment.brigadePlateNumber ?? ""}
-  </p>
-  </div>
-        `;
-    }
-}
 
 async function main() {
     TOKEN = new URLSearchParams(window.location.search).get("token");
@@ -108,59 +64,80 @@ async function main() {
         ]
     );
 
+    function createMarker() {
+
+        const markerElement = document.createElement("div");
+        markerElement.classList.add("marker_container");
+
+        markerElement.innerHTML = MARKER_IMAGE_SVG;
+
+        return new YMapMarker(ROUTE.start, markerElement);
+    }
+
     let animation: DriverAnimation;
     let lastChangedCoordinates: LngLat;
     let prevCoordinates: LngLat;
     let passedDistance = 0;
 
     const routeProgress = (coordinates: LngLat) => {
-        if (!lastChangedCoordinates) {
-            lastChangedCoordinates = route.geometry.coordinates[0];
-        }
 
+        // Initial values
+        prevCoordinates ??= route.geometry.coordinates[0];
+        lastChangedCoordinates ??= route.geometry.coordinates[0];
+
+        // Calculate variables
         const slicedLine = lineSlice(
             lastChangedCoordinates,
             coordinates,
             route.geometry
         );
-        const animationDistance = length(slicedLine, { units: "meters" });
-        const driverSpeed =
-            animationDistance / ((ANIMATE_DURATION_MS - 10) / 1000);
-        let passedTime = 0;
 
+        let passedTime = 0;
+        const animationDistance = length(slicedLine, { units: "meters" });
+        const driverSpeed = animationDistance / ((ANIMATE_DURATION_MS - 10) / 1000);
+
+        // Stop if distance is minimal
         if (animationDistance < 1) {
             return;
         }
 
         lastChangedCoordinates = coordinates;
 
+        // Animation
         animation = animate((progress) => {
-            const timeS = (progress * ANIMATE_DURATION_MS) / 1000;
-            const length = passedDistance + driverSpeed * (timeS - passedTime);
 
-            // Calculate the next location
-            const nextCoordinates = along(route.geometry, length, {
+            // Variables
+            const timeS = (progress * ANIMATE_DURATION_MS) / 1000;
+            const currentLength = passedDistance + driverSpeed * (timeS - passedTime);
+
+            // Next location
+            const nextCoordinates = along(route.geometry, currentLength, {
                 units: "meters",
             }).geometry.coordinates as LngLat;
 
-            // Update the coordinates
+            // Update coords
             marker.update({ coordinates: nextCoordinates });
 
-            // Correct the angles
+            // Rotate
             if (
                 prevCoordinates &&
                 !booleanEqual(point(prevCoordinates), point(nextCoordinates))
             ) {
-                angleProgress(nextCoordinates);
+                rotateAngle(nextCoordinates);
+
             }
 
-            // Correct the line
-            const [newLineStingFirstPart, newLineStringSecondPart] =
+            // Line Progress
+            const [newLineStingFirstPart, _] =
                 splitLineString(route, nextCoordinates);
             lineStringFirstPart.update({ geometry: newLineStingFirstPart });
 
+            var remainingDistance = roundTo(length(lineString(newLineStingFirstPart.coordinates)), 2);
+            var distanceElement = document.getElementById("popup-distance");
+            distanceElement.innerText = `${remainingDistance} km`
+
             prevCoordinates = nextCoordinates;
-            passedDistance = length;
+            passedDistance = currentLength;
             passedTime = timeS;
         });
     };
@@ -181,16 +158,7 @@ async function main() {
 
     map.addChild(new YMapDefaultMarker(ROUTE.end));
 
-    const markerElement = document.createElement("div");
-    markerElement.classList.add("marker_container");
-
-    const markerElementImg = document.createElement("img");
-    markerElementImg.src = MARKER_IMAGE_PATH;
-    markerElementImg.alt = "marker";
-    markerElementImg.id = "marker";
-    markerElement.appendChild(markerElementImg);
-
-    const marker = new YMapMarker(ROUTE.start, markerElement);
+    var marker = createMarker();
     map.addChild(marker);
 
     var i = 0;
@@ -228,7 +196,7 @@ async function main() {
         i++;
     }, ANIMATE_DURATION_MS);
 
-    function angleProgress(nextCoordinates: LngLat) {
+    function rotateAngle(nextCoordinates: LngLat) {
         const angle = angleFromCoordinate(
             prevCoordinates,
             nextCoordinates
@@ -260,16 +228,70 @@ async function main() {
         ROUTE.end.coordinates
     );
 
+    marker.update({ coordinates: route.geometry.coordinates[0] })
     lineStringFirstPart.update({ geometry: route.geometry });
-
     map.addChild(lineStringFirstPart);
+
+    prevCoordinates ??= route.geometry.coordinates[0];
+    const nextCoordinates = along(route.geometry, 1, {
+        units: "meters",
+    }).geometry.coordinates as LngLat;
+    rotateAngle(nextCoordinates);
+}
+
+async function fetchAssignment(token: string) {
+    const response = await getAssignments(TOKEN);
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const assignment: Assignment = await response.json();
+    if (!assignment) return;
+
+    fetchPopupContent(assignment);
+
+    ASSIGNMENT = assignment;
+
+    ROUTE.start.coordinates = [
+        assignment.brigadeLocation.latitude,
+        assignment.brigadeLocation.longitude,
+    ];
+    ROUTE.start.title = assignment.nameRu;
+    ROUTE.start.subtitle = assignment.brigadePlateNumber;
+
+    ROUTE.end.coordinates = [
+        assignment.destinationLocation.longitude,
+        assignment.destinationLocation.latitude,
+    ];
+    ROUTE.end.title = assignment.destinationFullAddressLine ?? "";
+}
+
+function roundTo(value: number, decimals: number): number {
+    return Number(Math.round(Number(value + 'e' + decimals)) + 'e-' + decimals);
+}
+
+function fetchPopupContent(assignment: Assignment) {
+    const popupContent = document.getElementById("popup-content");
+    if (assignment && popupContent) {
+        popupContent.innerHTML = `
+  <div class='balloon' id="balloon">
+
+  <p class="title">${assignment.nameRu}</p>
+  <p class="description">${assignment.destinationFullAddressLine}</p>
+  <p class="description">
+  ${assignment.brigadePlateNumber ?? ""} <b id="popup-distance"> </b>
+  </p>
+  </div>
+        `;
+    }
 }
 
 async function getAssignments(token: string) {
     const params = new URLSearchParams();
     params.append("token", token);
     return fetch(
-        `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/assignments?${params.toString()}`
+        `${BASE_URL}/brigade-tracking-service/api/brigade-tracking/assignments?${params.toString()}`
     );
 }
 
@@ -278,7 +300,7 @@ async function getBrigadeLocation(id: string, token: string) {
     params.append("token", token);
 
     return fetch(
-        `https://103.init.uz/brigade-tracking-service/api/brigade-tracking/brigade-location/${id}?${params.toString()}`
+        `${BASE_URL}/brigade-tracking-service/api/brigade-tracking/brigade-location/${id}?${params.toString()}`
     );
 }
 
