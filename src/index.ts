@@ -132,10 +132,12 @@ async function main() {
                 splitLineString(route, nextCoordinates);
             lineStringFirstPart.update({ geometry: newLineStingFirstPart });
 
+            // Calculate Distance
             var remainingDistance = roundTo(length(lineString(newLineStingFirstPart.coordinates)), 2);
             var distanceElement = document.getElementById("popup-distance");
             distanceElement.innerText = `${remainingDistance} km`
 
+            // update vars
             prevCoordinates = nextCoordinates;
             passedDistance = currentLength;
             passedTime = timeS;
@@ -228,15 +230,22 @@ async function main() {
         ROUTE.end.coordinates
     );
 
+    // Update the Coords
     marker.update({ coordinates: route.geometry.coordinates[0] })
     lineStringFirstPart.update({ geometry: route.geometry });
     map.addChild(lineStringFirstPart);
 
+    // Rotate the angle
     prevCoordinates ??= route.geometry.coordinates[0];
     const nextCoordinates = along(route.geometry, 1, {
         units: "meters",
     }).geometry.coordinates as LngLat;
     rotateAngle(nextCoordinates);
+
+    // Calculate Distance
+    var remainingDistance = roundTo(length(lineString(lineStringFirstPart.geometry.coordinates as LngLat[])), 2);
+    var distanceElement = document.getElementById("popup-distance");
+    distanceElement.innerText = `${remainingDistance} km`
 }
 
 async function fetchAssignment(token: string) {
