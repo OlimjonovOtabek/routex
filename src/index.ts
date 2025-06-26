@@ -26,7 +26,7 @@ let ASSIGNMENT: Assignment;
 main();
 
 async function main() {
-    TOKEN = new URLSearchParams(window.location.search).get("token");
+    TOKEN = new URLSearchParams(window.location.search).get("t");
 
     if (!TOKEN) {
         console.error("No token provided in the URL");
