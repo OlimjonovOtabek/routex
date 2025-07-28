@@ -26,7 +26,6 @@ pipelines:
             - docker
       - step:
           name: Deploy
-          deployment: dev-init
           script:
             - STACKFILE_PATH=swarm/init/stack.yml
             - export DOCKER_HOST=${DOCKER_HOST_INIT}
