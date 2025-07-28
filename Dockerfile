@@ -6,7 +6,13 @@ COPY . .
 
 RUN npm install
 
-RUN ./build.sh
+RUN npm run build \
+    # Step 2: Copy index.html to dist
+    && cp src/index.html dist/index.html \
+    # Step 3: Copy all .css files
+    && cp src/*.css dist/ \
+    # Step 4: Replace "main.ts" with "main.js" in the copied HTML
+    && sed -i 's/\.ts/\.js/g' dist/index.html
 
 FROM nginx:alpine AS runtime
 
