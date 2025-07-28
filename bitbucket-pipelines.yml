@@ -24,6 +24,18 @@ pipelines:
             - docker push -a ${IMAGE_NAME}
           services:
             - docker
+    dev:
+      - step:
+          name: Build And Push
+          script:
+            - DOCKERFILE_PATH=Dockerfile
+            - IMAGE_NAME=${DEVHUB_REGISTRY}/uds-brigade-tracking-ui
+            - VERSION="0.1.${BITBUCKET_BUILD_NUMBER}"
+            - docker build -f $DOCKERFILE_PATH -t ${IMAGE_NAME}:${VERSION} .
+            - echo ${DEVHUB_REGISTRY_PASSWORD} | docker login --username $DEVHUB_REGISTRY_USERNAME --password-stdin $DEVHUB_REGISTRY
+            - docker push -a ${IMAGE_NAME}
+          services:
+            - docker
       - step:
           name: Deploy
           script:
