@@ -30,6 +30,6 @@ pipelines:
             - STACKFILE_PATH=swarm/init/stack.yml
             - export DOCKER_HOST=${DOCKER_HOST_INIT}
             - export APPLICATION_VERSION="0.1.${BITBUCKET_BUILD_NUMBER}"
-            - wget --no-check-certificate --server-response --method POST http://103.init.uz:9000/api/webhooks/0a8d8063-982f-44d2-b1f9-23d84b31deb7?tag=$APPLICATION_VERSION
+            - wget --no-check-certificate --server-response --method POST http://103.init.uz:9000/api/webhooks/671f344b-dd80-4eaa-a8db-b56b005c87ec?tag=$APPLICATION_VERSION
           services:
             - docker
