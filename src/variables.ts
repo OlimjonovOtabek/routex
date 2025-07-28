@@ -9,7 +9,7 @@ export const LOCATION: YMapLocationRequest = {
 export const INITIAL_DRIVER_SPEED = 60;
 export const MIN_DRIVER_SPEED = 10;
 export const MAX_DRIVER_SPEED = 200;
-export const BASE_URL = "https://n103.meddata.uz";
+export const BASE_URL = "https://103-tracking.init.uz";
 
 export const ROUTE: {
     start: YMapDefaultMarkerProps;
