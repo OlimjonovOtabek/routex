@@ -1,71 +1,89 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, minimum-scale=1"
-        />
-        <script
-            crossorigin
-            src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"
-        ></script>
-        <script
-            crossorigin
-            src="https://cdn.jsdelivr.net/npm/@turf/turf@7.1"
-        ></script>
+ <head>
+  <meta charset="UTF-8" />
+  <meta
+   name="viewport"
+   content="width=device-width, initial-scale=1, minimum-scale=1"
+  />
+  <script
+   crossorigin
+   src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"
+  ></script>
+  <script
+   crossorigin
+   src="https://cdn.jsdelivr.net/npm/@turf/turf@7.1"
+  ></script>
 
-        <!-- To make the map appear, you must add your apikey -->
-        <script
-            src="https://api-maps.yandex.ru/v3/?apikey=a28b0400-4c74-4bfe-b636-3884070c0f2e&lang=ru_RU"
-            type="text/javascript"
-        ></script>
+  <!-- To make the map appear, you must add your apikey -->
+  <script
+   src="https://api-maps.yandex.ru/v3/?apikey=a28b0400-4c74-4bfe-b636-3884070c0f2e&lang=ru_RU"
+   type="text/javascript"
+  ></script>
 
-        <script
-            data-plugins="transform-modules-umd"
-            data-presets="typescript"
-            type="text/babel"
-            src="./common.ts"
-        ></script>
+  <script
+   data-plugins="transform-modules-umd"
+   data-presets="typescript"
+   type="text/babel"
+   src="./common.ts"
+  ></script>
 
-        <script
-            data-plugins="transform-modules-umd"
-            data-presets="typescript"
-            type="text/babel"
-            src="./variables.ts"
-        ></script>
+  <script
+   data-plugins="transform-modules-umd"
+   data-presets="typescript"
+   type="text/babel"
+   src="./variables.ts"
+  ></script>
 
-        <script
-            data-plugins="transform-modules-umd"
-            data-presets="typescript"
-            type="text/babel"
-            src="./index.ts"
-        ></script>
+  <script
+   data-plugins="transform-modules-umd"
+   data-presets="typescript"
+   type="text/babel"
+   src="./index.ts"
+  ></script>
 
-        <!-- prettier-ignore -->
-        <style> html, body, #app { width: 100%; height: 100%; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; } .toolbar { position: absolute; z-index: 1000; top: 0; left: 0; display: flex; align-items: center; padding: 16px; } .toolbar a { padding: 16px; }  </style>
-        <link rel="stylesheet" href="./common.css" />
-    </head>
-    <body>
-        <div class="map-container">
-            <div id="map" style="width: 100%; height: 100vh">
-                <ymaps3
-                    class="ymaps3--popup-marker_container"
-                    style="z-index: 10000l; bottom: auto; top: 0"
-                    id="header-content"
-                    ><div class="balloon" style="width: 100%" id="balloon">
-                        <p class="title">103</p>
-                    </div>
-                </ymaps3>
-                <ymaps3
-                    class="ymaps3--popup-marker_container"
-                    style="z-index: 10000"
-                    id="popup-content"
-                    ><div class="balloon" id="balloon">
-                        <p class="title" id="p_label"></p>
-                        <p class="description" id="p_description"></p></div
-                ></ymaps3>
-            </div>
-        </div>
-    </body>
+  <!-- prettier-ignore -->
+  <style> html, body, #app { width: 100%; height: 100%; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; } .toolbar { position: absolute; z-index: 1000; top: 0; left: 0; display: flex; align-items: center; padding: 16px; } .toolbar a { padding: 16px; }  </style>
+  <link rel="stylesheet" href="./common.css" />
+ </head>
+ <body>
+  <div class="map-container">
+   <div id="map" style="width: 100%; height: 100vh">
+    <ymaps3
+     class="ymaps3--popup-marker_container"
+     style="z-index: 10000l; bottom: auto; top: 0"
+     id="header-content"
+     ><div
+      class="balloon"
+      id="balloon"
+      style="
+       display: flex;
+       justify-content: space-between;
+       width: 60%;
+       flex-direction: row;
+       align-items: center;
+      "
+     >
+      <img src="../assets/logo_103.png" alt="" width="35" />
+      <p class="title">RTTYoM</p>
+     </div>
+    </ymaps3>
+    <ymaps3
+     class="ymaps3--popup-marker_container"
+     style="z-index: 10000"
+     id="popup-content"
+     ><div class="balloon" id="balloon">
+      <p class="title" id="p_label"></p>
+      <p class="description" id="p_description"></p></div
+    ></ymaps3>
+   </div>
+  </div>
+ </body>
 </html>
+
+<style>
+ .ymaps3--popup-marker_container {
+  padding: 0;
+  overflow: auto;
+ }
+</style>

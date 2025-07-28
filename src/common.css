@@ -44,6 +44,7 @@
     right: 0px;
     z-index: 10000;
     bottom: 0px;
+    width: 90%;
     margin: 1rem;
 }
 
@@ -141,7 +142,6 @@ input[type="range"]::-webkit-slider-thumb {
     border-radius: 12px;
     padding: 8px 4px;
     height: 100%;
-    width: 350px;
     overflow: hidden;
 }
 
